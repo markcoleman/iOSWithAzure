@@ -1,1 +1,2 @@
 pod 'AzureSDK-iOS', '~> 1.1'
+pod 'ATMHud@dhoerl', '~> 3.0'

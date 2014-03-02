@@ -10,9 +10,11 @@
 #import "DetailViewController.h"
 #import <WindowsAzureMobileServices.h>
 #import "AppDelegate.h"
+#import <ATMHud.h>
 
 @interface MasterViewController () {
     NSMutableArray *_objects;
+    ATMHud *hud;
 }
 @end
 
@@ -30,6 +32,17 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    // Keep a strong ivar reference to it (ie, "ATMHud *hud")
+    hud = [[ATMHud alloc] initWithDelegate:self];
+    // or  hud = [ATMHud new]; using the block delegate
+    
+
+    [hud setActivity:YES];
+    [hud showInView:self.view];
+
+
+    
 	// Do any additional setup after loading the view, typically from a nib.
     self.navigationItem.leftBarButtonItem = self.editButtonItem;
 
@@ -40,6 +53,7 @@
     addButton.enabled = NO;
     
     //get data from azure mobile services
+    [hud setCaption:@"Getting guids from azure"];
     MSClient *client = [(AppDelegate *) [[UIApplication sharedApplication] delegate] client];
     MSTable *itemTable = [client tableWithName:@"Item"];
     [itemTable readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
@@ -54,6 +68,7 @@
             [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
         }
         addButton.enabled = YES;
+        [hud hide];
     }];
     
 }
@@ -66,6 +81,8 @@
 
 - (void)insertNewObject:(id)sender
 {
+    
+    [hud setCaption:@"Sending Guid to Azure"];
     
     NSString *UUID = [[NSUUID UUID] UUIDString];
     
@@ -84,6 +101,7 @@
             [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
 
         }
+        [hud hide];
     }];
 }
 
@@ -122,6 +140,7 @@
 {
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         
+        [hud setCaption:@"Removing guid from azure."];
         //remove the item from mobile services
         MSClient *client = [(AppDelegate *) [[UIApplication sharedApplication] delegate] client];
         MSTable *itemTable = [client tableWithName:@"Item"];
@@ -133,6 +152,7 @@
            
             [_objects removeObjectAtIndex:indexPath.row];
             [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+            [hud hide];
         }];
         
 
